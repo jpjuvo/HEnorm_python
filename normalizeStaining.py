@@ -127,8 +127,11 @@ def normalizeStaining(imgPath, saveDir='normalized/', unmixStains=False, Io=240,
     E = np.reshape(E.T, (h, w, 3)).astype(np.uint8)
     
     if saveDir is not None:
+        Inorm = cv2.cvtColor(Inorm, cv2.COLOR_BGR2RGB)
         cv2.imwrite(fn+'.png', Inorm)
         if unmixStains:
+            H = cv2.cvtColor(H, cv2.COLOR_BGR2RGB)
+            E = cv2.cvtColor(E, cv2.COLOR_BGR2RGB)
             cv2.imwrite(fn+'_H.png', H)
             cv2.imwrite(fn+'_E.png', E)
         return
