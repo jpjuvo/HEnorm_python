@@ -3,3 +3,5 @@ __pycache__/
 protos/__pycache__/
 core/__pycache__/
 utils/__pycache__/
+*.c
+*.pyd
