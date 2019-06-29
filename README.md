@@ -1,3 +1,8 @@
+### Fork of [H&E histopathological staining normalization of schaugf](https://github.com/schaugf/HEnorm_python)
+- Optimized for multiprocessing - June '19 [Joni Juvonen](https://github.com/jpjuvo)  
+
+-----------------------------------
+
 # Staining Unmixing and Normalization in Python
 
 NOTE: Originally published at the Assessment of Mitosis Detection Algorithms 2013 challenge website (http://http://amida13.isi.uu.nl).
@@ -20,20 +25,20 @@ It is based on the method described in [1]. Some examples of staining normalizat
 
 ## Normalized Images
 
-<img src='imgs/norm1.png' width='30%'>
-<img src='imgs/norm2.png' width='30%'>
+<img src='normalized/example1.png' width='30%'>
+<img src='normalized/example2.png' width='30%'>
 
 ## Stain Unmixing
 
 ### Example 1
 
-<img src='imgs/norm1_H.png' width='30%'>
-<img src='imgs/norm1_E.png' width='30%'>
+<img src='normalized/example1_H.png' width='30%'>
+<img src='normalized/example1_E.png' width='30%'>
 
 ### Example 2
 
-<img src='imgs/norm2_H.png' width='30%'>
-<img src='imgs/norm2_E.png' width='30%'>
+<img src='normalized/example2_H.png' width='30%'>
+<img src='normalized/example2_E.png' width='30%'>
 
 
 

@@ -1,19 +1,31 @@
-import argparse
+import os
 import numpy as np
-from PIL import Image
+import cv2
 
-
-def normalizeStaining(img, saveFile=None, Io=240, alpha=1, beta=0.15):
-    ''' Normalize staining appearence of H&E stained images
+def normalizeStaining(imgPath, saveDir='normalized/', unmixStains=False, Io=240, alpha=1, beta=0.15):
+    ''' Normalize staining appearence of H&E stained images. 
+    Produces a normalized copy of the input RGB image to the saveDir path.
+    If unmixStains=True, separate H and E images are also saved.
+    
+    This is a modified version of the original https://github.com/schaugf/HEnorm_python
+    optimized for multiprocessing - June '19 Joni Juvonen
     
     Example use:
-        see test.py
+        normalizeStaining('image.png', saveDir='normalized/')
+
+    Example use with multiprocessing:
+        with Pool(8) as p:
+            p.map(normalizeStaining, ImagePathList)
         
     Input:
-        I: RGB input image
-        Io: (optional) transmitted light intensity
+        imgPath (string): Path to an RGB input image
+        saveDir (string): A directory path where the normalized image copies are saved. If this is None, the function returns the images (default='normalized/'))
+        unmixStains (bool): save also H and E stain images 
+        Io (int): transmitted light intensity (default=240)
+        alpha (default=1)
+        beta (default=0.15)
         
-    Output:
+    Output (returns only if savePath=None):
         Inorm: normalized image
         H: hematoxylin image
         E: eosin image
@@ -22,7 +34,24 @@ def normalizeStaining(img, saveFile=None, Io=240, alpha=1, beta=0.15):
         A method for normalizing histology slides for quantitative analysis. M.
         Macenko et al., ISBI 2009
     '''
+
+    #extract name for the savefile
+    base=os.path.basename(imgPath)
+    name_wo_ext = os.path.splitext(base)[0]
+    fn = os.path.join(saveDir, name_wo_ext)
+
+    # create output directory if it doesn't exist
+    if not os.path.isdir(saveDir):
+        os.mkdir(saveDir)
              
+    # skip if this file already exists
+    if (os.path.isfile(fn+'.png')):
+        return
+
+    # read image with OpenCV (faster than PIL)
+    img = cv2.imread(imgPath)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
     HERef = np.array([[0.5626, 0.2159],
                       [0.7201, 0.8012],
                       [0.4062, 0.5581]])
@@ -41,10 +70,18 @@ def normalizeStaining(img, saveFile=None, Io=240, alpha=1, beta=0.15):
     # remove transparent pixels
     ODhat = np.array([i for i in OD if not any(i<beta)])
         
-    # compute eigenvectors
-    eigvals, eigvecs = np.linalg.eigh(np.cov(ODhat.T))
-    
-    #eigvecs *= -1
+    # compute eigenvectors and handle some of the common errors that are caused by image colors with unattainable eigenvectors
+    eigvals, eigvecs = None, None
+    try:
+        eigvals, eigvecs = np.linalg.eigh(np.cov(ODhat.T))
+    except AssertionError:
+        print('Failed to normalize {0}, copying this to output file unaltered.'.format(imgPath))
+        cv2.imwrite(fn+'.png', img)
+        return
+    except np.linalg.LinAlgError:
+        print('Eigenvalues did not converge in {0}, copying this to output file unaltered.'.format(imgPath))
+        cv2.imwrite(fn+'.png', img)
+        return
     
     #project on the plane spanned by the eigenvectors corresponding to the two 
     # largest eigenvalues    
@@ -89,28 +126,15 @@ def normalizeStaining(img, saveFile=None, Io=240, alpha=1, beta=0.15):
     E[E>255] = 254
     E = np.reshape(E.T, (h, w, 3)).astype(np.uint8)
     
-    if saveFile is not None:
-        Image.fromarray(Inorm).save(saveFile+'.png')
-        Image.fromarray(H).save(saveFile+'_H.png')
-        Image.fromarray(E).save(saveFile+'_E.png')
-
-    return Inorm, H, E
-    
-    
-if __name__=='__main__':
-    
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--imageFile', type=str, default='example1.tif', help='RGB image file')
-    parser.add_argument('--saveFile', type=str, default='output', help='save file')
-    parser.add_argument('--Io', type=int, default=240)
-    parser.add_argument('--alpha', type=float, default=1)
-    parser.add_argument('--beta', type=float, default=0.15)
-    args = parser.parse_args()
-    
-    img = np.array(Image.open(args.imageFile))
-
-    normalizeStaining(img = img,
-                      saveFile = args.saveFile,
-                      Io = args.Io,
-                      alpha = args.alpha,
-                      beta = args.beta)
+    if saveDir is not None:
+        cv2.imwrite(fn+'.png', Inorm)
+        if unmixStains:
+            cv2.imwrite(fn+'_H.png', H)
+            cv2.imwrite(fn+'_E.png', E)
+        return
+    else:
+        # construct return tuple
+        returnTuple = (Inorm,)
+        if unmixStains:
+            returnTuple = returnTuple +  (H, E)
+        return returnTuple
