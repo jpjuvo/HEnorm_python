@@ -1,6 +1,6 @@
 ### Fork of [H&E histopathological staining normalization of schaugf](https://github.com/schaugf/HEnorm_python)
 - Optimized for speed and multiprocessing - June '19 [Joni Juvonen](https://github.com/jpjuvo)  
-- To recompile cython binaries, run ```python .\setup.py build_ext --inplace```
+- To recompile cython binaries, run ```python ./setup.py build_ext --inplace```
 
 -----------------------------------
 
