@@ -1,4 +1,4 @@
-import normalizeStaining
+import normalizeStaining_cython
 from multiprocessing import Pool
 import os
 
@@ -13,4 +13,4 @@ for r, d, f in os.walk(imagesDir):
             imageFiles.append(os.path.join(r, file))
 
 with Pool(threads) as p:
-    p.map(normalizeStaining.normalizeStaining, imageFiles)
+    p.map(normalizeStaining_cython.normalizeStaining, imageFiles)
