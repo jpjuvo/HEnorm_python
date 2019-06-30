@@ -134,18 +134,22 @@ def normalizeStaining(imgPath, saveDir='normalized/', unmixStains=False, Io=240,
     C2 = np.array([C[:,i]/maxC*maxCRef for i in range(C.shape[1])]).T
     
     # recreate the image using reference mixing matrix
-    Inorm = np.multiply(Io, np.exp(-HERef.dot(C2)))
-    Inorm[Inorm>255] = 254
-    Inorm = np.reshape(Inorm.T, (h, w, 3)).astype(np.uint8)  
+    cdef np.ndarray[char, ndim=3] Inorm
+    Inorm_f = np.multiply(Io, np.exp(-HERef.dot(C2)))
+    Inorm_f[Inorm_f>255] = 254
+    Inorm = np.reshape(Inorm_f.T, (h, w, 3)).astype(np.uint8)  
     
     # unmix hematoxylin and eosin
-    H = np.multiply(Io, np.exp(np.expand_dims(-HERef[:,0], axis=1).dot(np.expand_dims(C2[0,:], axis=0))))
-    H[H>255] = 254
-    H = np.reshape(H.T, (h, w, 3)).astype(np.uint8)
+    cdef np.ndarray[char, ndim=3] H
+    cdef np.ndarray[char, ndim=3] E
+    if unmixStains:
+        H_f = np.multiply(Io, np.exp(np.expand_dims(-HERef[:,0], axis=1).dot(np.expand_dims(C2[0,:], axis=0))))
+        H_f[H_f>255] = 254
+        H = np.reshape(H_f.T, (h, w, 3)).astype(np.uint8)
     
-    E = np.multiply(Io, np.exp(np.expand_dims(-HERef[:,1], axis=1).dot(np.expand_dims(C2[1,:], axis=0))))
-    E[E>255] = 254
-    E = np.reshape(E.T, (h, w, 3)).astype(np.uint8)
+        E_f = np.multiply(Io, np.exp(np.expand_dims(-HERef[:,1], axis=1).dot(np.expand_dims(C2[1,:], axis=0))))
+        E_f[E_f>255] = 254
+        E = np.reshape(E_f.T, (h, w, 3)).astype(np.uint8)
     
     if saveDir is not None:
         Inorm = cv2.cvtColor(Inorm, cv2.COLOR_BGR2RGB)
