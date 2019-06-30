@@ -1,4 +1,5 @@
 __pycache__/
+build/
 .vscode
 protos/__pycache__/
 core/__pycache__/
