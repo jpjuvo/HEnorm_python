@@ -3,7 +3,7 @@ import numpy as np
 cimport numpy as np
 import cv2
 
-def normalizeStaining(imgPath, saveDir='normalized/', unmixStains=False, int Io=240, int alpha=1, double beta=0.15):
+def normalizeStaining(imgPath, saveDir='normalized/', unmixStains=False, Io=240, alpha=1, beta=0.15):
     ''' Normalize staining appearence of H&E stained images. 
     Produces a normalized copy of the input RGB image to the saveDir path.
     If unmixStains=True, separate H and E images are also saved.
@@ -78,11 +78,11 @@ def normalizeStaining(imgPath, saveDir='normalized/', unmixStains=False, int Io=
         
     # compute eigenvectors and handle some of the common errors that are caused by image colors with unattainable eigenvectors
     cdef np.ndarray[np.float64_t, ndim=2] cov
-    cov = np.cov(ODhat.T)
     cdef np.ndarray[np.float64_t, ndim=1] eigvals
     cdef np.ndarray[np.float64_t, ndim=2] eigvecs
     #eigvals, eigvecs = None, None
     try:
+        cov = np.cov(ODhat.T)
         eigvals, eigvecs = np.linalg.eigh(cov)
     except AssertionError:
         print('Failed to normalize {0}, copying this to output file unaltered.'.format(imgPath))
