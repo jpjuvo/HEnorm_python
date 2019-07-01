@@ -71,25 +71,27 @@ def normalizeStaining(imgPath, saveDir='normalized/', unmixStains=False, Io=240,
     # calculate optical density
     cdef np.ndarray[np.float64_t, ndim=2] OD
     OD = -np.log((rimg+1)/Io)
-    
-    # remove transparent pixels
-    cdef np.ndarray[np.float64_t, ndim=2] ODhat
-    ODhat = np.array([i for i in OD if not any(i<beta)])
         
     # compute eigenvectors and handle some of the common errors that are caused by image colors with unattainable eigenvectors
+    cdef np.ndarray[np.float64_t, ndim=2] ODhat
     cdef np.ndarray[np.float64_t, ndim=2] cov
     cdef np.ndarray[np.float64_t, ndim=1] eigvals
     cdef np.ndarray[np.float64_t, ndim=2] eigvecs
     #eigvals, eigvecs = None, None
     try:
+        # remove transparent pixels
+        ODhat = np.array([i for i in OD if not any(i<beta)])
+        # covariance matrix
         cov = np.cov(ODhat.T)
+        # eigenvectors
         eigvals, eigvecs = np.linalg.eigh(cov)
-    except AssertionError:
-        print('Failed to normalize {0}, copying this to output file unaltered.'.format(imgPath))
-        cv2.imwrite(fn+'.png', img)
-        return
     except np.linalg.LinAlgError:
         print('Eigenvalues did not converge in {0}, copying this to output file unaltered.'.format(imgPath))
+        cv2.imwrite(fn+'.png', img)
+        return
+    except:
+        # this is most likely an assertion error when len(ODHat.shape) < 2
+        print('Failed to normalize {0}, copying this to output file unaltered.'.format(imgPath))
         cv2.imwrite(fn+'.png', img)
         return
     
