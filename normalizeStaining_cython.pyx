@@ -10,6 +10,8 @@ def normalizeStaining(imgPath, saveDir='normalized/', unmixStains=False, Io=240,
     
     This is a modified version of the original https://github.com/schaugf/HEnorm_python
     optimized for multiprocessing - June '19 Joni Juvonen
+
+    Speed optimization (~8x speed improvements) by Mikko - https://github.com/mjkvaak/HEnorm_python
     
     Example use:
         normalizeStaining('image.png', saveDir='normalized/')
@@ -80,7 +82,7 @@ def normalizeStaining(imgPath, saveDir='normalized/', unmixStains=False, Io=240,
     #eigvals, eigvecs = None, None
     try:
         # remove transparent pixels
-        ODhat = np.array([i for i in OD if not any(i<beta)])
+        ODhat = OD[~np.any(OD<beta, axis=1)]
         # covariance matrix
         cov = np.cov(ODhat.T)
         # eigenvectors
@@ -132,8 +134,11 @@ def normalizeStaining(imgPath, saveDir='normalized/', unmixStains=False, Io=240,
     # normalize stain concentrations
     cdef np.ndarray[np.float64_t, ndim=1] maxC
     maxC = np.array([np.percentile(C[0,:], 99), np.percentile(C[1,:],99)])
+    cdef np.ndarray[np.float64_t, ndim=1] tmp
     cdef np.ndarray[np.float64_t, ndim=2] C2
-    C2 = np.array([C[:,i]/maxC*maxCRef for i in range(C.shape[1])]).T
+    tmp = np.divide(maxC,maxCRef)
+    C2 = np.divide(C,tmp[:, np.newaxis])
+    #C2 = np.array([C[:,i]/maxC*maxCRef for i in range(C.shape[1])]).T
     
     # recreate the image using reference mixing matrix
     cdef np.ndarray[char, ndim=3] Inorm

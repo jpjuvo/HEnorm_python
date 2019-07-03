@@ -1,5 +1,6 @@
 ### Fork of [H&E histopathological staining normalization of schaugf](https://github.com/schaugf/HEnorm_python)
-- Optimized for speed and multiprocessing - June '19 [Joni Juvonen](https://github.com/jpjuvo)  
+- Optimized for speed and multiprocessing - June '19 [Joni Juvonen](https://github.com/jpjuvo)
+- Speed optimization (~8x speed improvements) by [Mikko](https://github.com/mjkvaak/HEnorm_python)
 - **First, compile cython binaries:** run ```python ./setup.py build_ext --inplace```
 
 -----------------------------------
