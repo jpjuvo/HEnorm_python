@@ -13,7 +13,7 @@ Randomize staining appearance for H&E stained images.
 
 Example usage:
 ```
-import normalizeStaining
+import stainAugmentation
 import cv2
 
 original_image = cv2.cvtColor(cv2.imread('imgs/example1.png'), cv2.COLOR_BGR2RGB)
@@ -22,6 +22,23 @@ augmented_image = stainAugmentation.randomHEStaining(original_image)
 
 ## Random H&E augmentations
 ![H&E augmentations](imgs/example_augmentations.png)
+
+## How to use this as a Fastai transform
+```
+import PIL
+import numpy as np
+import stainAugmentation
+
+def _HEaugment(x):
+    img = PIL.Image.fromarray(image2np(x*255).astype('uint8'))
+    x = stainAugmentation.randomHEStaining(img)
+    x = pil2tensor(x/255.,np.float32)
+    return x
+
+HEaugment = TfmPixel(_HEaugment)
+```
+
+Now, `HEaugment()` can be passed to transformations list: `tfms = [HEaugment()]`
 
 -----------------------------------
 
