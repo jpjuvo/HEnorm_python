@@ -1,7 +1,27 @@
-### Fork of [H&E histopathological staining normalization of schaugf](https://github.com/schaugf/HEnorm_python)
-- Optimized for speed and multiprocessing - June '19 [Joni Juvonen](https://github.com/jpjuvo)
-- Speed optimization (~8x speed improvements) by [Mikko](https://github.com/mjkvaak/HEnorm_python)
-- **First, compile cython binaries:** run ```python ./setup.py build_ext --inplace```
+### Modified from [H&E histopathological staining normalization of schaugf](https://github.com/schaugf/HEnorm_python)
+
+Modifications:
+
+- H&E normalization optimized for speed and multiprocessing - June '19 [Joni Juvonen](https://github.com/jpjuvo)
+- Speed optimization (~8x speed improvements) - June '19 [Mikko](https://github.com/mjkvaak/HEnorm_python)
+- H&E Stain augmentor - August '19 [Joni Juvonen](https://github.com/jpjuvo)
+
+-----------------------------------
+
+# H&E stain augmentation
+Randomize staining appearance for H&E stained images.
+
+Example usage:
+```
+import normalizeStaining
+import cv2
+
+original_image = cv2.cvtColor(cv2.imread('imgs/example1.png'), cv2.COLOR_BGR2RGB)
+augmented_image = stainAugmentation.randomHEStaining(original_image)
+```
+
+## Random H&E augmentations
+![H&E augmentations](imgs/example_augmentations.png)
 
 -----------------------------------
 
@@ -17,6 +37,8 @@ This Python code, adapted from the original MATLAB implementation, performs stai
 It is based on the method described in [1]. Some examples of staining normalization can be seen in the figure below.
 
 [1] A method for normalizing histology slides for quantitative analysis, M Macenko, M Niethammer, JS Marron, D Borland, JT Woosley, G Xiaojun, C Schmitt, NE Thomas, IEEE ISBI, 2009. dx.doi.org/10.1109/ISBI.2009.5193250
+
+**First, compile cython binaries:** run ```python ./setup.py build_ext --inplace```
 
 # Examples
 
